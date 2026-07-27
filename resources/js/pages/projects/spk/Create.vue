@@ -1,0 +1,27 @@
+<script setup lang="ts">
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ArrowLeft, Building2, ChevronRight, FileText, Handshake, UserRound } from '@lucide/vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+type Project = { id: number; nama_perusahaan: string; unit_layanan: string };
+const props = defineProps<{ project: Project }>();
+defineOptions({ layout: { breadcrumbs: [{ title: 'Projects', href: '/projects' }, { title: 'SPK', href: '#' }] } });
+
+const form = useForm({ no_spk_pelanggan: '', tanggal_awal_kontrak: '', tanggal_akhir_kontrak: '', tanggal_pekerjaan: '', nama_pic_bast: '', nama_pic_bapp: '', nama_mitra: '', berkas_spk: '' });
+function submit() {
+ form.post(`/projects/${props.project.id}/spk`); 
+}
+</script>
+
+<template>
+    <Head title="SPK" />
+    <main class="min-h-full bg-[#F7FAFB] px-4 py-6 md:px-8 md:py-10"><div class="mx-auto max-w-5xl"><Link href="/projects" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#125D72]"><ArrowLeft class="size-4" /> Kembali ke projects</Link>
+        <header class="mt-6 rounded-3xl bg-[#125D72] p-6 text-white shadow-[0_20px_50px_rgba(18,93,114,0.18)] md:p-8"><div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"><div><div class="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-xs font-semibold text-[#E7F6F9]"><FileText class="size-3.5" /> TAHAP 03 — SPK</div><h1 class="mt-4 text-3xl font-semibold">Catat kontrak SPK</h1><p class="mt-2 text-sm text-[#E7F6F9]">Simpan data kontrak dan Mitra untuk project ini.</p></div><div class="rounded-2xl bg-white/10 p-4"><p class="text-xs text-[#E7F6F9]">Pelanggan</p><p class="mt-1 font-semibold">{{ project.nama_perusahaan }}</p><p class="mt-1 text-xs text-white/70">{{ project.unit_layanan }}</p></div></div></header>
+        <form class="mt-7 space-y-6" @submit.prevent="submit"><section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-7"><div class="flex items-center gap-4"><div class="grid size-10 place-items-center rounded-xl bg-[#E7F6F9] text-[#125D72]"><Handshake class="size-5" /></div><div><h2 class="font-semibold text-slate-900">Informasi kontrak</h2><p class="text-sm text-slate-500">Nomor SPK dan periode kontrak pelanggan.</p></div></div><div class="mt-6 grid gap-5 md:grid-cols-2"><div class="space-y-2"><Label for="no_spk_pelanggan">No SPK Pelanggan <span class="text-[#DA2E09]">*</span></Label><Input id="no_spk_pelanggan" v-model="form.no_spk_pelanggan" class="h-11" placeholder="Nomor SPK pelanggan" /><InputError :message="form.errors.no_spk_pelanggan" /></div><div class="space-y-2"><Label for="nama_mitra">Nama Mitra <span class="text-[#DA2E09]">*</span></Label><Input id="nama_mitra" v-model="form.nama_mitra" class="h-11" placeholder="Nama Mitra pelaksana" /><InputError :message="form.errors.nama_mitra" /></div><div class="space-y-2"><Label for="tanggal_awal_kontrak">Tanggal Awal Kontrak <span class="text-[#DA2E09]">*</span></Label><Input id="tanggal_awal_kontrak" v-model="form.tanggal_awal_kontrak" type="date" class="h-11" /><InputError :message="form.errors.tanggal_awal_kontrak" /></div><div class="space-y-2"><Label for="tanggal_akhir_kontrak">Tanggal Akhir Kontrak <span class="text-[#DA2E09]">*</span></Label><Input id="tanggal_akhir_kontrak" v-model="form.tanggal_akhir_kontrak" type="date" class="h-11" /><InputError :message="form.errors.tanggal_akhir_kontrak" /></div><div class="space-y-2"><Label for="tanggal_pekerjaan">Tanggal Pekerjaan</Label><Input id="tanggal_pekerjaan" v-model="form.tanggal_pekerjaan" type="date" class="h-11" /><InputError :message="form.errors.tanggal_pekerjaan" /></div><div class="space-y-2"><Label for="berkas_spk">Berkas SPK (Google Drive)</Label><Input id="berkas_spk" v-model="form.berkas_spk" type="url" class="h-11" placeholder="https://drive.google.com/..." /><InputError :message="form.errors.berkas_spk" /></div></div></section>
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-7"><div class="flex items-center gap-4"><div class="grid size-10 place-items-center rounded-xl bg-[#E7F6F9] text-[#125D72]"><UserRound class="size-5" /></div><div><h2 class="font-semibold text-slate-900">PIC dokumen</h2><p class="text-sm text-slate-500">Kontak untuk proses BAST dan BAPP.</p></div></div><div class="mt-6 grid gap-5 md:grid-cols-2"><div class="space-y-2"><Label for="nama_pic_bast">Nama PIC BAST</Label><Input id="nama_pic_bast" v-model="form.nama_pic_bast" class="h-11" /></div><div class="space-y-2"><Label for="nama_pic_bapp">Nama PIC BAPP</Label><Input id="nama_pic_bapp" v-model="form.nama_pic_bapp" class="h-11" /></div></div></section>
+        <div class="sticky bottom-4 z-10 flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between"><p class="flex items-center gap-2 text-sm text-slate-500"><Building2 class="size-4 text-[#14A2BA]" /> Tahap berikutnya: BAST dan tagihan pelanggan.</p><div class="flex gap-3"><Button as-child variant="outline" class="h-11"><Link href="/projects">Batal</Link></Button><Button type="submit" :disabled="form.processing" class="h-11 bg-[#125D72] hover:bg-[#0D4858]">{{ form.processing ? 'Menyimpan…' : 'Simpan SPK' }} <ChevronRight class="size-4" /></Button></div></div></form>
+    </div></main>
+</template>

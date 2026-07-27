@@ -1,0 +1,43 @@
+<script setup lang="ts">
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ArrowLeft, ChevronRight, CreditCard, Landmark, Plus, ReceiptText, Trash2 } from '@lucide/vue';
+import { ref } from 'vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+type Project = { id: number; nama_perusahaan: string };
+type Spk = { no_spk_pelanggan: string; nama_mitra: string; tanggal_awal_kontrak: string; tagihan_mitra: unknown[] };
+const props = defineProps<{ project: Project; spk: Spk }>();
+defineOptions({ layout: { breadcrumbs: [{ title: 'Projects', href: '/projects' }, { title: 'Tagihan Mitra', href: '#' }] } });
+
+const entry = () => ({ no_parking: '', material: 0, jasa: 0, nilai_spk_exc_ppn: 0, nilai_spk_inc_ppn: 0, status_smartpayment: '', tgl_verifikator: '', tgl_approval: '', tgl_man_perbendaharaan: '', durasi_lama_hari: undefined as number | undefined, nilai_terbayar: 0, tanggal_bayar: '', status_nodin: '', tanggal_nodin: '', no_nodin: '', scan_nodin: '', scan_tagihan_mitra: '' });
+const form = useForm({ tagihan_mitra: [entry()] });
+const expanded = ref<number | null>(0);
+const error = (index: number, field: string) => (form.errors as unknown as Record<string, string | undefined>)[`tagihan_mitra.${index}.${field}`];
+function addEntry() {
+ form.tagihan_mitra.push(entry()); expanded.value = form.tagihan_mitra.length - 1; 
+}
+function removeEntry(index: number) {
+ if (form.tagihan_mitra.length > 1) {
+form.tagihan_mitra.splice(index, 1);
+} 
+}
+function submit() {
+ form.post(`/projects/${props.project.id}/tagihan-mitra`); 
+}
+</script>
+
+<template>
+    <Head title="Tagihan Mitra" />
+    <main class="min-h-full bg-[#F7FAFB] px-4 py-6 md:px-8 md:py-10"><div class="mx-auto max-w-6xl"><Link href="/projects" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#125D72]"><ArrowLeft class="size-4" /> Kembali ke projects</Link>
+        <header class="mt-6 rounded-3xl bg-[#125D72] p-6 text-white shadow-[0_20px_50px_rgba(18,93,114,0.18)] md:p-8"><div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"><div><div class="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-xs font-semibold text-[#E7F6F9]"><CreditCard class="size-3.5" /> TAHAP 05 — TAGIHAN MITRA</div><h1 class="mt-4 text-3xl font-semibold">Batch pembayaran Mitra</h1><p class="mt-2 text-sm text-[#E7F6F9]">Tambah batch dari SmartPayment. Data SPK disalin otomatis sebagai referensi.</p></div><div class="rounded-2xl bg-white/10 p-4 text-sm"><p class="text-[#E7F6F9]">{{ spk.nama_mitra }}</p><p class="mt-1 font-semibold">{{ spk.no_spk_pelanggan }}</p><p class="mt-1 text-xs text-white/70">{{ project.nama_perusahaan }}</p></div></div></header>
+        <form class="mt-7 space-y-5" @submit.prevent="submit"><article v-for="(item, index) in form.tagihan_mitra" :key="index" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div class="flex items-center justify-between gap-4 p-5"><button type="button" class="flex min-w-0 items-center gap-3 text-left" @click="expanded = expanded === index ? null : index"><span class="grid size-9 shrink-0 place-items-center rounded-xl bg-[#E7F6F9] font-semibold text-[#125D72]">{{ index + 1 }}</span><span><span class="block font-semibold text-slate-900">{{ item.no_parking || `Batch pembayaran ${index + 1}` }}</span><span class="block text-sm text-slate-500">{{ item.status_smartpayment || 'Lengkapi data SmartPayment' }}</span></span></button><button v-if="form.tagihan_mitra.length > 1" type="button" class="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-[#DA2E09]" @click="removeEntry(index)"><Trash2 class="size-4" /></button></div>
+            <div v-show="expanded === index" class="border-t border-slate-100 p-5 md:p-7"><div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3"><div class="space-y-2"><Label>No Parking</Label><Input v-model="item.no_parking" class="h-11" /><InputError :message="error(index, 'no_parking')" /></div><div class="space-y-2"><Label>Material <span class="text-[#DA2E09]">*</span></Label><Input v-model.number="item.material" type="number" min="0" step="0.01" class="h-11" /><InputError :message="error(index, 'material')" /></div><div class="space-y-2"><Label>Jasa <span class="text-[#DA2E09]">*</span></Label><Input v-model.number="item.jasa" type="number" min="0" step="0.01" class="h-11" /><InputError :message="error(index, 'jasa')" /></div><div class="space-y-2"><Label>Nilai SPK (Exc PPN) <span class="text-[#DA2E09]">*</span></Label><Input v-model.number="item.nilai_spk_exc_ppn" type="number" min="0" step="0.01" class="h-11" /><InputError :message="error(index, 'nilai_spk_exc_ppn')" /></div><div class="space-y-2"><Label>Nilai SPK (Inc PPN) <span class="text-[#DA2E09]">*</span></Label><Input v-model.number="item.nilai_spk_inc_ppn" type="number" min="0" step="0.01" class="h-11" /><InputError :message="error(index, 'nilai_spk_inc_ppn')" /></div><div class="space-y-2"><Label>Status di SmartPayment</Label><Input v-model="item.status_smartpayment" class="h-11" placeholder="Contoh: Menunggu approval" /></div></div>
+                <div class="mt-7 border-t border-slate-100 pt-6"><div class="flex items-center gap-3"><div class="grid size-8 place-items-center rounded-lg bg-[#E7F6F9] text-[#125D72]"><Landmark class="size-4" /></div><div><h3 class="text-sm font-semibold text-slate-900">Approval & pembayaran</h3><p class="text-xs text-slate-500">Isi sesuai informasi di SmartPayment.</p></div></div><div class="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-4"><div class="space-y-2"><Label>Tgl Verifikator</Label><Input v-model="item.tgl_verifikator" type="date" class="h-11" /></div><div class="space-y-2"><Label>Tgl Approval</Label><Input v-model="item.tgl_approval" type="date" class="h-11" /></div><div class="space-y-2"><Label>Tgl Man Perbendaharaan</Label><Input v-model="item.tgl_man_perbendaharaan" type="date" class="h-11" /></div><div class="space-y-2"><Label>Durasi Lama Hari</Label><Input v-model.number="item.durasi_lama_hari" type="number" min="0" class="h-11" placeholder="Input dari SmartPayment" /></div><div class="space-y-2"><Label>Nilai Terbayar <span class="text-[#DA2E09]">*</span></Label><Input v-model.number="item.nilai_terbayar" type="number" min="0" step="0.01" class="h-11" /><InputError :message="error(index, 'nilai_terbayar')" /></div><div class="space-y-2"><Label>Tanggal Bayar</Label><Input v-model="item.tanggal_bayar" type="date" class="h-11" /></div></div></div>
+                <div class="mt-7 border-t border-slate-100 pt-6"><div class="flex items-center gap-3"><div class="grid size-8 place-items-center rounded-lg bg-[#E7F6F9] text-[#125D72]"><ReceiptText class="size-4" /></div><div><h3 class="text-sm font-semibold text-slate-900">Nodin & dokumen</h3><p class="text-xs text-slate-500">Link dokumen disimpan di Google Drive.</p></div></div><div class="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3"><div class="space-y-2"><Label>Status Nodin</Label><Input v-model="item.status_nodin" class="h-11" /></div><div class="space-y-2"><Label>Tanggal Nodin</Label><Input v-model="item.tanggal_nodin" type="date" class="h-11" /></div><div class="space-y-2"><Label>No Nodin</Label><Input v-model="item.no_nodin" class="h-11" /></div><div class="space-y-2"><Label>Scan Nodin</Label><Input v-model="item.scan_nodin" type="url" class="h-11" placeholder="https://drive.google.com/..." /></div><div class="space-y-2"><Label>Scan Tagihan Mitra</Label><Input v-model="item.scan_tagihan_mitra" type="url" class="h-11" placeholder="https://drive.google.com/..." /></div></div></div></div>
+        </article><button type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[#14A2BA]/50 bg-[#E7F6F9]/50 py-4 text-sm font-semibold text-[#125D72] transition hover:bg-[#E7F6F9]" @click="addEntry"><Plus class="size-4" /> Tambah batch pembayaran</button>
+        <div class="sticky bottom-4 z-10 flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between"><p class="text-sm text-slate-500">Project selesai otomatis setelah BAST dan Tagihan Mitra seluruhnya lunas.</p><div class="flex gap-3"><Button as-child variant="outline" class="h-11"><Link href="/projects">Batal</Link></Button><Button type="submit" :disabled="form.processing" class="h-11 bg-[#125D72] hover:bg-[#0D4858]">{{ form.processing ? 'Menyimpan…' : 'Simpan batch' }} <ChevronRight class="size-4" /></Button></div></div></form>
+    </div></main>
+</template>
